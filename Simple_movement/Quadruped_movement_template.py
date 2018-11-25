@@ -213,7 +213,7 @@ while 1:
 		off_y = 0
 
 	# Turning stategy
-        x_data = Amp_turn[i] * x_ep
+    x_data = Amp_turn[i] * x_ep
 	y_data = y_ep
 
 	

@@ -125,7 +125,7 @@ q43.enable(timestep)
 
 # Main loop:
 
-dt = timestep ** -1
+dt = timestep * 1e-3
 
 # Initialization
 
