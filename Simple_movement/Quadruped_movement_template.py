@@ -204,7 +204,8 @@ while 1:
        
 	# First order approximation
   	x_ep = np.interp(theta_internal, Theta, x_end)
-	y_ep = np.interp(theta_internal, Theta, y_end) #y_end[i][ip-1] +  (y_end[i][ip] - y_end[i][ip-1]) * dtheta/Dtheta
+	y_ep = np.interp(theta_internal, Theta, y_end)
+	#y_end[i][ip-1] +  (y_end[i][ip] - y_end[i][ip-1]) * dtheta/Dtheta
 
         # Offset control of the legs
 	if i in [1,3]:

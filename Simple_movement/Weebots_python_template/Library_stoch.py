@@ -17,24 +17,24 @@ import numpy.linalg as la
 
 PI = math.pi
 
-def UserControl(k, gP, v0):
-    if k == ord('W') or gP == 11:
-        v = v0 + 0.001
-    elif k == ord('S') or gP == 8:
-        v = v0 - 0.001
+def UserControl(k, v0):
+    if k == ord('W'):
+        v = v0 + 0.1
+    elif k == ord('S'):
+        v = v0 - 0.1
     else:
         v = v0
 
-    if k == ord('A') or gP == 10:
+    if k == ord('A'):
         omega = 0.25
-    elif k == ord('D') or gP == 9:
+    elif k == ord('D'):
         omega = -0.25
     else:
         omega = 0
 
-    if k == ord('E') or gP == 5:
+    if k == ord('E'):
         vs = 0.25
-    elif k == ord('Q') or gP == 4:
+    elif k == ord('Q'):
         vs = -0.25
     else:
         vs = 0
@@ -202,7 +202,7 @@ def Inverse_Kinamatics(Lh, Lk, r):
     l1 = Lh[1]
     l2 = Lk[1]
 
-    zai = atan2(r[1], r[0])
+    zai = atan2(r[1], r[0]) + PI
     alpha = PI/2 + zai
     v1 = (l1 ** 2 + l2 ** 2 - l3 ** 2)
     v2 = (-2 * l1 * l2)
@@ -212,9 +212,9 @@ def Inverse_Kinamatics(Lh, Lk, r):
     elif cInv <-1: cInV = -1
 
     q2 = math.acos(cInv)
-    q1 = math.asin(l2 * sin(math.pi - q2) / l3) + alpha
-
-    return [q1, q2+q1]
+    #q1 = math.asin(l2 * sin(math.pi - q2) / l3) + alpha
+    q1 = math.atan2(l2*sin(q2), l2*cos(q2) + l1) + zai
+    return [q1, q2]
 
 def ik_point2point(p0, p1, pb, nx, ny, nz, l1, l2):
     r = p1 - p0
