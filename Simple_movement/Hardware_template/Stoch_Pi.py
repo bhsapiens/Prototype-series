@@ -20,33 +20,37 @@ PI = math.pi # Pi
 # Defining functions for key board input\
 
 def HigherControl(k, v0):
-    # Oscillation control
-    if k == 'w':
-            v = v0 + 0.1
-    elif k == 's':
-            v = v0 - 0.1
-    else:
+	# Oscillation control
+	if k == 'w':
+            v = v0 + 0.05
+	elif k == 's':
+            v = v0 - 0.05
+	else:
             v = v0
-    # Turning variable
-    if k == 'a':
+	# Turning variable
+	if k == 'a':
             omega = 1
-    elif k == 'd':
+	elif k == 'd':
             omega = -1
-    else:
+	else:
             omega = 0
 
-    return [v, omega]
+	if k == 'b':
+		omega = 0; v = 0
+
+	return [v, omega]
 
 global v0
 v0 = 0.0
-
+kb = KBHit() # creating Object of class KBHit
 # Get key board value funtion
 
 def get_input(k):
-    global v0
-    [v0, omega] = HigherControl(k, v0)
-    print ("V, w")
-    print ([v0, omega])
+	global v0
+	[v0, omega] = HigherControl(k, v0)
+	print ("V, w")
+	print ([v0, omega])
+	return [v0, omega]
 
 #Global Variables
 pwm1 = Adafruit_PCA9685.PCA9685(address=0x40, busnum=1)
@@ -95,10 +99,10 @@ MR = [210, 195, 300, 265, 420, 460, 430, 250, 350, 315, 500, 160]
 # [400, 530, 310, 265, 140, 275, 430, 380, 342, 315, 140, 160] Banckup of the last  working value
 # [FLK  FLH  FLA  FRA  FRH  FRK  HLH  HLK  HLA  HRA  HRK  HRH]
 
-MR[m_FRK] = 460; MR[m_FRH] = 200; MR[m_FRA] = 265
+MR[m_FRK] = 460; MR[m_FRH] = 225; MR[m_FRA] = 265
 MR[m_FLK] = 180; MR[m_FLH] = 490; MR[m_FLA] = 300
-MR[m_HRK] = 500; MR[m_HRH] = 200; MR[m_HRA] = 315
-MR[m_HLK] = 250; MR[m_HLH] = 500; MR[m_HLA] = 350
+MR[m_HRK] = 500; MR[m_HRH] = 190; MR[m_HRA] = 315
+MR[m_HLK] = 250; MR[m_HLH] = 470; MR[m_HLA] = 350
 
 Theta = end_data[:,0]
 Dtheta = Theta[1] - Theta[0]
@@ -115,53 +119,54 @@ q_3d = np.zeros([12, 1])
 
 theta = [0 , 0, 0 , 0]
 theta0 = [0 , 0, 0 , 0]
+omega = 0 # Intiating turning variable
+fre_out = 0 # Initiating oscillation frequrncy (Hz)
 while 1:
     if kb.kbhit():
-       c = kb.getch()
-       if ord(c) == 27: # ESC
-          break
-       [fre_out, omega]=get_input(c)
+	c = kb.getch()
+	if ord(c) == 27: # ESC
+		break
+	[fre_out, omega]=get_input(c)
 
     begin_time =  time.time()
 
     if flag == 0:
         Leg_no = input("Which leg do you wish to operate ?  ( FL(0) / FR(1) / HL(2) / HR(3) / All(4): \n >> ")
-	    flag = 1;
-	    T = 0
+	flag = 1;
+	T = 0
 
     if T == T_run:
 		T = 0
     else:
 		T += 1
-
+    print [fre_out, omega]
     # Omega to motion
     if omega <0:
-        Amp_turn = np.array([-1, -1, 1, 1])
+        Amp_turn = np.array([0, 0, 1, 1])
     elif omega > 0:
-        Amp_turn = np.array([1, 1, -1, -1])
+        Amp_turn = np.array([1, 1, 0, 0])
     else:
         Amp_turn = np.array([1, 1, 1, 1])
 
     # Inverse kinematics and angle transformation of individual legs
     for i in range(4):
-        theta[i] = w * dt +  theta0[i]				# Eular integration
+        theta[i] = 2*PI*fre_out * dt +  theta0[i]				# Eular integration
         theta_internal =(theta[i]) % (2*PI)		# mod(theta, 2 pi)
     	ip = int((theta_internal - Theta_min) / Dtheta)
     	dtheta = theta_internal - Theta[ip-1]			# difference
 
-	    # First order approximation
-  	    x_data = x_end[i][ip-1] + (x_end[i][ip] - x_end[i][ip-1]) * dtheta/Dtheta
-	    y_data = y_end[i][ip-1] +  (y_end[i][ip] - y_end[i][ip-1]) * dtheta/Dtheta
+	# First order approximation
+  	x_data = x_end[i][ip-1] + (x_end[i][ip] - x_end[i][ip-1]) * dtheta/Dtheta
+	y_data = y_end[i][ip-1] +  (y_end[i][ip] - y_end[i][ip-1]) * dtheta/Dtheta
 
-	    r = [-Amp_turn[i] * x_data, y_data]
-	    q_IK = IK(Lh, Lk, r)
-
-	    # Angle transformation between Robot Actuator frame and 
-	    # calculation assumption
-	    # [0-Fl 1-Hl 2-Fr 3-Hr]		# 		Fl Hl Fr Hr
-	    q_3d[3*i] = PI/2 + q_IK[0] 	# Hip: 		0  3  6  9
+	r = [-Amp_turn[i] * x_data, y_data]
+	q_IK = IK(Lh, Lk, r)
+	# Angle transformation between Robot Actuator frame and
+	# calculation assumption
+	# [0-Fl 1-Hl 2-Fr 3-Hr]		# 		Fl Hl Fr Hr
+	q_3d[3*i] = PI/2 + q_IK[0] 	# Hip: 		0  3  6  9
         q_3d[3*i+1] = PI/2 - q_IK[1] 	# Knee: 	1  4  7  10
-	    q_3d[3*i+2] = 0 		# Abduction: 	2  5  8  11
+	q_3d[3*i+2] = 0 		# Abduction: 	2  5  8  11
 
 
     # Connection/ Transformation between input Data format and Motor input format
@@ -203,6 +208,6 @@ while 1:
     theta0 = theta
     end_time = time.time()
     dt = end_time  - begin_time
-    print PWM, dt
-        
+
+
 kb.set_normal_term()
