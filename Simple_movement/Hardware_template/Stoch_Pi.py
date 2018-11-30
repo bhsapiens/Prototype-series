@@ -52,13 +52,14 @@ def get_input(k):
 	print ([v0, omega])
 	return [v0, omega]
 
-#Global Variables
+#PWM initialization for I2C serial communication
 pwm1 = Adafruit_PCA9685.PCA9685(address=0x40, busnum=1)
-pwm1.set_pwm_freq(50)
+pwm1.set_pwm_freq(50) # Operating frequency of the servo: 50 Hz
 pwm2 = Adafruit_PCA9685.PCA9685(address=0x41, busnum=1)
-pwm2.set_pwm_freq(50)
+pwm2.set_pwm_freq(50) # Operating frequency of the servo: 50 Hz
 bus = SMBus(1)
 
+# Pin number at the I2C-PWM breaker board
 n_FRK = 0; n_FRH = 1;  n_FRA = 2
 n_FLK = 15; n_FLH = 14; n_FLA = 13
 n_HRK = 15; n_HRH = 14; n_HRA = 13
@@ -86,7 +87,7 @@ dt = 0.05
 T_run = 20000
 
 # Motor inputs
-
+# Motor number
 m_FLK = 0; m_FLH = 1; m_FLA = 2
 m_FRK = 3; m_FRH = 4;  m_FRA = 5
 m_HLK = 6; m_HLH = 7; m_HLA = 8
@@ -98,16 +99,20 @@ PWM = [300, 300, 325, 325, 300, 300, 400, 300, 325, 325, 300, 300]
 MR = [210, 195, 300, 265, 420, 460, 430, 250, 350, 315, 500, 160]
 # [400, 530, 310, 265, 140, 275, 430, 380, 342, 315, 140, 160] Banckup of the last  working value
 # [FLK  FLH  FLA  FRA  FRH  FRK  HLH  HLK  HLA  HRA  HRK  HRH]
-
+# Motor reference values:
+# This is different for different robots. This should contain the zero reference
+# for the legs of the motor
 MR[m_FRK] = 460; MR[m_FRH] = 225; MR[m_FRA] = 265
 MR[m_FLK] = 180; MR[m_FLH] = 490; MR[m_FLA] = 300
 MR[m_HRK] = 500; MR[m_HRH] = 190; MR[m_HRA] = 315
 MR[m_HLK] = 250; MR[m_HLH] = 470; MR[m_HLA] = 350
 
+# Seperating the data
 Theta = end_data[:,0]
-Dtheta = Theta[1] - Theta[0]
-Theta_min = min(Theta)
+Dtheta = Theta[1] - Theta[0] # uniform difference
+Theta_min = min(Theta)  # minimum theta avialable in the provided dataset
 
+# Seperating the x-y data from the data set
 y_end = [end_data[:,3], end_data[:,7], end_data[:,5], end_data[:,9]]
 x_end = [end_data[:,2], end_data[:,6], end_data[:,4], end_data[:,8]]
 
