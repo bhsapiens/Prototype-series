@@ -84,7 +84,7 @@ w = 2*PI*f		# Hz to sec/rad conversion
 
 # Integration time
 dt = 0.05
-T_run = 20000
+T_run = 20000 # maximum runtime of the robot
 
 # Motor inputs
 # Motor number

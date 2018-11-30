@@ -65,9 +65,10 @@ x_off = 0; y_off = -0.175;
 X = X + x_off;
 Y = Y + y_off;
 
+percent = linspace(50*min(Theta)/pi, 50*max(Theta)/pi, length(Theta))';
 Xm = circshift(X, floor(length(X)/2));
 Ym = circshift(X, floor(length(Y)/2));
-data_set = [Theta, X, Y, Xm, Ym, X, Y, Xm, Ym];
+data_set = [Theta, percent, X, Y, Xm, Ym, X, Y, Xm, Ym];
 % The "data_set" contains the phase(Theta), X(x- axis motion), Y(Y-axis
 % motion), Xm (Shifted x-axis), Ym (shifted Y-axis motion)
 
