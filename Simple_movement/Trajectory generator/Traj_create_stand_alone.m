@@ -53,6 +53,9 @@ for i = 1:length(y)
 end
 theta = [theta_temp - pi; theta_temp + pi; theta_temp + 3*pi];
 
+xm = circshift(x, floor(length(x)/2));
+ym = circshift(y, floor(length(y)/2));
+
 X = interp1(theta, [x;x;x], Theta);
 Y = interp1(theta, [y;y;y], Theta);
 
@@ -66,14 +69,14 @@ X = X + x_off;
 Y = Y + y_off;
 
 percent = linspace(50*min(Theta)/pi, 50*max(Theta)/pi, length(Theta))';
-Xm = circshift(X, floor(length(X)/2));
-Ym = circshift(X, floor(length(Y)/2));
-data_set = [Theta, percent, X, Y, Xm, Ym, X, Y, Xm, Ym];
+Xm = circshift(X, floor(length(X)/3));
+Ym = circshift(Y, floor(length(Y)/3));
+data_set = [Theta, percent, X, Y, Xm, Ym, Xm, Ym, X, Y];
 % The "data_set" contains the phase(Theta), X(x- axis motion), Y(Y-axis
 % motion), Xm (Shifted x-axis), Ym (shifted Y-axis motion)
 
 figure
-plot(Theta*180/pi, data_set(:,2:3),'o')
+plot(Theta*180/pi, data_set(:,3:4),'o')
 grid on
 
 figure
